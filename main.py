@@ -19,6 +19,7 @@ def get_db():
     finally:
         db.close()
 
+# Usuários:
 
 @app.get("/usuarios", response_model=List[schemas.UsuarioResponse])
 def listar_usuarios(db: Session = Depends(get_db)):
@@ -83,3 +84,70 @@ def deletar_usuario(usuario_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return {"mensagem": "Usuário deletado com sucesso"}
+
+# Tarefas:
+
+@app.get("/tarefas", response_model=List[schemas.TarefaResponse])
+def listar_tarefas(db: Session = Depends(get_db)):
+    """Lista todos as tarefas"""
+    tarefas = db.query(models.Tarefa).all()
+    return tarefas
+
+
+@app.get("/tarefas/{tarefa_id}", response_model=schemas.TarefaResponse)
+def buscar_tarefa(tarefa_id: int, db: Session = Depends(get_db)):
+    """Buscar tarefa por ID"""
+    tarefa = db.query(models.Tarefa).filter(models.Tarefa.id == tarefa_id).first()
+
+    if not tarefa:
+        raise HTTPException(status_code=404, detail="Tarefa não encontrada")
+
+    return tarefa
+
+
+@app.post("/tarefas", response_model=schemas.TarefaResponse)
+def criar_tarefa(tarefa: schemas.TarefaCreate, db: Session = Depends(get_db)):
+    """Criar tarefa"""
+    db_tarefa = models.Tarefa(**tarefa.dict())
+    db.add(db_tarefa)
+    db.commit()
+    db.refresh(db_tarefa)
+
+    return db_tarefa
+
+
+@app.put("/tarefas/{tarefa_id}", response_model=schemas.TarefaResponse)
+def atualizar_tarefa(
+    tarefa_id: int,
+    tarefa_atualizada: schemas.TarefaCreate,
+    db: Session = Depends(get_db),
+):
+    """Atualizar tarefa"""
+    tarefa = db.query(models.Tarefa).filter(models.Tarefa.id == tarefa_id).first()
+
+    if not tarefa:
+        raise HTTPException(status_code=404, detail="Tarefa não encontrada")
+
+    tarefa.titulo = tarefa_atualizada.titulo
+    tarefa.descricao = tarefa_atualizada.descricao
+    tarefa.usuario_id = tarefa_atualizada.usuario_id
+    tarefa.concluida = tarefa_atualizada.concluida
+
+    db.commit()
+    db.refresh(tarefa)
+
+    return tarefa
+
+
+@app.delete("/tarefas/{tarefa_id}")
+def deletar_usuario(tarefa_id: int, db: Session = Depends(get_db)):
+    """Deletar tarefa"""
+    tarefa = db.query(models.Tarefa).filter(models.Tarefa.id == tarefa_id).first()
+
+    if not tarefa:
+        raise HTTPException(status_code=404, detail="Tarefa não encontrada")
+
+    db.delete(tarefa)
+    db.commit()
+
+    return {"mensagem": "Tarefa deletada com sucesso"}
