@@ -147,7 +147,7 @@ def atualizar_tarefa(
 
 
 @app.delete("/tarefas/{tarefa_id}")
-def deletar_usuario(tarefa_id: int, db: Session = Depends(get_db)):
+def deletar_tarefa(tarefa_id: int, db: Session = Depends(get_db)):
     """Deletar tarefa"""
     tarefa = db.query(models.Tarefa).filter(models.Tarefa.id == tarefa_id).first()
 
