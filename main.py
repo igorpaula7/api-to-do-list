@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
-from auth import hash_senha
+from auth import hash_senha, verificar_senha
 
 import models
 import schemas
@@ -158,3 +158,15 @@ def deletar_usuario(tarefa_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return {"mensagem": "Tarefa deletada com sucesso"}
+
+@app.post("/login")
+def login(email:str, senha: str, db: Session = Depends(get_db)):
+    usuario = db.query(models.Usuario).filter(models.Usuario.email == email).first()
+
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+    
+    if not verificar_senha(senha, usuario.senha):
+        raise HTTPException(status_code=401, detail="Senha incorreta.")
+    
+    return {"mensagem": "Login Realizado com Sucesso.", "usuario_id":usuario.id}
