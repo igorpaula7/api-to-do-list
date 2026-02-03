@@ -43,7 +43,8 @@ classDiagram
 `GET /usuarios{id}` - Busca usuário por ID;  
 `POST /usuarios` - Cria novo usuário;  
 `PUT /usuarios/{id}` - Altera um usuário existente;  
-`DELETE /usuarios/{id}` - Deleta um usuário.
+`DELETE /usuarios/{id}` - Deleta um usuário.  
+`POST /login` - Efetua o login na aplicação.
 
 ### Tarefas:
 
