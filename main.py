@@ -1,7 +1,7 @@
 from typing import List
-
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
+from auth import hash_senha
 
 import models
 import schemas
@@ -42,7 +42,14 @@ def buscar_usuario(usuario_id: int, db: Session = Depends(get_db)):
 @app.post("/usuarios", response_model=schemas.UsuarioResponse)
 def criar_usuario(usuario: schemas.UsuarioCreate, db: Session = Depends(get_db)):
     """Criar usuário"""
-    db_usuario = models.Usuario(**usuario.dict())
+
+    senha_hash = hash_senha(usuario.senha)
+
+    db_usuario = models.Usuario(
+        nome = usuario.nome,
+        email = usuario.email,
+        senha = senha_hash
+    )
     db.add(db_usuario)
     db.commit()
     db.refresh(db_usuario)
