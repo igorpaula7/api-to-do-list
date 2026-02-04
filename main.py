@@ -19,7 +19,9 @@ def get_db():
     finally:
         db.close()
 
+
 # Usuários:
+
 
 @app.get("/usuarios", response_model=List[schemas.UsuarioResponse])
 def listar_usuarios(db: Session = Depends(get_db)):
@@ -31,7 +33,7 @@ def listar_usuarios(db: Session = Depends(get_db)):
 @app.get("/usuarios/{usuario_id}", response_model=schemas.UsuarioResponse)
 def buscar_usuario(usuario_id: int, db: Session = Depends(get_db)):
     """Buscar usuário por ID"""
-    usuario = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
+    usuario = db.query(models.Usuario).get(usuario_id)
 
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
@@ -46,9 +48,7 @@ def criar_usuario(usuario: schemas.UsuarioCreate, db: Session = Depends(get_db))
     senha_hash = hash_senha(usuario.senha)
 
     db_usuario = models.Usuario(
-        nome = usuario.nome,
-        email = usuario.email,
-        senha = senha_hash
+        nome=usuario.nome, email=usuario.email, senha=senha_hash
     )
     db.add(db_usuario)
     db.commit()
@@ -64,7 +64,7 @@ def atualizar_usuario(
     db: Session = Depends(get_db),
 ):
     """Atualizar usuário"""
-    usuario = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
+    usuario = db.query(models.Usuario).get(usuario_id)
 
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
@@ -82,7 +82,7 @@ def atualizar_usuario(
 @app.delete("/usuarios/{usuario_id}")
 def deletar_usuario(usuario_id: int, db: Session = Depends(get_db)):
     """Deletar usuário"""
-    usuario = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
+    usuario = db.query(models.Usuario).get(usuario_id)
 
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
@@ -92,7 +92,9 @@ def deletar_usuario(usuario_id: int, db: Session = Depends(get_db)):
 
     return {"mensagem": "Usuário deletado com sucesso"}
 
+
 # Tarefas:
+
 
 @app.get("/tarefas", response_model=List[schemas.TarefaResponse])
 def listar_tarefas(db: Session = Depends(get_db)):
@@ -104,7 +106,7 @@ def listar_tarefas(db: Session = Depends(get_db)):
 @app.get("/tarefas/{tarefa_id}", response_model=schemas.TarefaResponse)
 def buscar_tarefa(tarefa_id: int, db: Session = Depends(get_db)):
     """Buscar tarefa por ID"""
-    tarefa = db.query(models.Tarefa).filter(models.Tarefa.id == tarefa_id).first()
+    tarefa = db.query(models.Tarefa).get(tarefa_id)
 
     if not tarefa:
         raise HTTPException(status_code=404, detail="Tarefa não encontrada")
@@ -130,7 +132,7 @@ def atualizar_tarefa(
     db: Session = Depends(get_db),
 ):
     """Atualizar tarefa"""
-    tarefa = db.query(models.Tarefa).filter(models.Tarefa.id == tarefa_id).first()
+    tarefa = db.query(models.Tarefa).get(tarefa_id)
 
     if not tarefa:
         raise HTTPException(status_code=404, detail="Tarefa não encontrada")
@@ -149,7 +151,7 @@ def atualizar_tarefa(
 @app.delete("/tarefas/{tarefa_id}")
 def deletar_tarefa(tarefa_id: int, db: Session = Depends(get_db)):
     """Deletar tarefa"""
-    tarefa = db.query(models.Tarefa).filter(models.Tarefa.id == tarefa_id).first()
+    tarefa = db.query(models.Tarefa).get(tarefa_id)
 
     if not tarefa:
         raise HTTPException(status_code=404, detail="Tarefa não encontrada")
@@ -159,14 +161,15 @@ def deletar_tarefa(tarefa_id: int, db: Session = Depends(get_db)):
 
     return {"mensagem": "Tarefa deletada com sucesso"}
 
+
 @app.post("/login")
-def login(email:str, senha: str, db: Session = Depends(get_db)):
-    usuario = db.query(models.Usuario).filter(models.Usuario.email == email).first()
+def login(email: str, senha: str, db: Session = Depends(get_db)):
+    usuario = db.query(models.Usuario).get(email)
 
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado.")
-    
+
     if not verificar_senha(senha, usuario.senha):
         raise HTTPException(status_code=401, detail="Senha incorreta.")
-    
-    return {"mensagem": "Login Realizado com Sucesso.", "usuario_id":usuario.id}
+
+    return {"mensagem": "Login Realizado com Sucesso.", "usuario_id": usuario.id}
