@@ -71,7 +71,7 @@ def atualizar_usuario(
 
     usuario.nome = usuario_atualizado.nome
     usuario.email = usuario_atualizado.email
-    usuario.senha = usuario_atualizado.senha
+    usuario.senha = hash_senha(usuario_atualizado.senha)
 
     db.commit()
     db.refresh(usuario)
