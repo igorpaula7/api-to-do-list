@@ -164,7 +164,7 @@ def deletar_tarefa(tarefa_id: int, db: Session = Depends(get_db)):
 
 @app.post("/login")
 def login(email: str, senha: str, db: Session = Depends(get_db)):
-    usuario = db.query(models.Usuario).get(email)
+    usuario = db.query(models.Usuario).filter(models.Usuario.email == email).first()
 
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado.")
